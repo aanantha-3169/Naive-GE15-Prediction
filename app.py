@@ -22,7 +22,7 @@ st.sidebar.write("See how the results change by changing the following:")
 # user inputs on sidebar
 S = st.sidebar.slider('% of PH votes in PRU14 contributed by Bersatu', value=1.0,min_value=0.0, max_value=1.0)
 
-X = st.sidebar.slider('% of Undi 18 turnout', value=0.8,min_value=0.0, max_value=1.0)
+#X = st.sidebar.slider('% of Undi 18 turnout', value=0.8,min_value=0.0, max_value=1.0)
 
 #Content
 
