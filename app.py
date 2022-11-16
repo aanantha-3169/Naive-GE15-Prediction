@@ -13,26 +13,39 @@ from PIL import Image
 title = "Naive GE15 Prediction 🇲🇾"
 st.title(title)
 
-st.write("by  [Aanan](aananmariappan@gmail.com)")
-
-#Sidebar
-st.sidebar.title("Scenarios")
-st.sidebar.write("See how the results change by changing the following:")
-
-# user inputs on sidebar
-S = st.sidebar.slider('% of PH votes in PRU14 contributed by Bersatu', value=1.0,min_value=0.0, max_value=1.0)
-
-#X = st.sidebar.slider('% of Undi 18 turnout', value=0.8,min_value=0.0, max_value=1.0)
+st.write("by (https://github.com/aanantha-3169)")
 
 #Content
 
 st.header("*Why Undi 18 Matters!*")
 st.markdown("This simple simulation aim to demonstrate how young voters can change the elections 😱"
-" We use results from PRU 13 & 14 to calculate the contribution of each party to a coalition.")
-image = Image.open('Timeline.jpeg')
-st.image(image,caption='Evolution of Coalitions')
-
+" We use results from PRU 13 & 14 to calculate the contribution of ea ch party to a coalition.")
+#image = Image.open('Timeline.jpeg')
+#st.image(image,caption='Evolution of Coalitions')
 st.markdown("Note: For simplicity we are ignoring GTA 👴🏼 and Independents 🤠 for this analysis")
+
+#Sidebar
+st.title("Scenarios")
+st.write("See how the results change by changing the following:")
+
+# user inputs on sidebar
+S = st.slider('% of PH votes in PRU14 contributed by Bersatu', value=1.0,min_value=0.0, max_value=1.0)
+
+X = st.slider('% of Undi 18 turnout', value=0.8,min_value=0.0, max_value=1.0)
+
+A = st.slider('% of Undi 18 to BN', value=0.38,min_value=0.0, max_value=1.0)
+
+B = st.slider('% of Undi 18 to PN', value=0.21,min_value=0.0, max_value=1.0)
+
+C = st.slider('% of Undi 18 to PH', value=0.41,min_value=0.0, max_value=1.0)
+
+if A+B+C == 1:
+   pass
+
+else:
+ st.warning('Total Undi 18 votes must add up to 1 🥴. Change values and try again', icon="⚠️")
+
+
 
 ####################
 ### ANALYSIS ###
@@ -41,7 +54,7 @@ st.markdown("Note: For simplicity we are ignoring GTA 👴🏼 and Independents 
 #Reading Relevant Files
 pru14_pm = pd.read_csv('keputusan-pru-14-parlimen_v2.csv')
 pru13_pm = pd.read_csv('keputusan-pru-13-parlimen.csv')
-LOKALITI_FINAL = pd.read_csv('undi_18_inputs.csv')
+undi18_inputs = pd.read_csv('undi_18_inputs.csv')
 
 #Formatting Files
 pru14_pm['BILANGAN UNDI'] = pru14_pm['BILANGAN UNDI'].apply(lambda x: x.replace(',',''))
@@ -58,24 +71,31 @@ dict_party = {'MIC':'BN','UMNO':'BN','MCA':'BN','GERAKAN':'BN','PPP':'BN','PKR':
 pru13_pm['PARTI'] = pru13_pm.PARTI.apply(lambda x : dict_party[x])
 pru14_pm['PARTI'] = pru14_pm.PARTI.apply(lambda x : dict_party[x])
 
-####################
-### Prediction ###
-####################
-list_winner = []
-df_percent = pd.DataFrame(columns = ['LOKALITI','PARTI','PERCENT_VOTES'])
-
 list_LOKALITI = []
 for state in pru14_pm.NEGERI.unique():
     for lokal in pru14_pm[pru14_pm.NEGERI == state].LOKALITI.unique():
      list_LOKALITI += [(state,lokal)]
-
+####################
+### Prediction ###
+####################
+list_winner = []
 for state,lok in list_LOKALITI:
     
  #Get dataframe with PRU13 and PRU14 numbers for each lokaliti   
  pru_14 = pru14_pm[pru14_pm.LOKALITI == lok]
  pru_13 = pru13_pm[pru13_pm.LOKALITI == lok]
  
+ #Get total number of voters and voter turnout
+ undi_biasa_turnout = undi18_inputs[undi18_inputs.LOKALITI == lok]['undi_biasa_turnout'].unique()[0]
+ undi_18_turnout = X
+ undi_18 = undi18_inputs[undi18_inputs.LOKALITI == lok]['undi_18'].unique()[0]
+ undi_biasa = undi18_inputs[undi18_inputs.LOKALITI == lok]['undi_biasa'].unique()[0]
+ 
+ undi_18_attend = (undi_18 * undi_18_turnout)
+ undi_biasa_attend = (undi_biasa*undi_biasa_turnout)
     
+ total_attend = round((undi_18_attend + undi_biasa_attend))
+
  #Create dataframe to capture results from PRU13 & PRU14   
  dict_df = {'PARTI':['BN','PN','PH','BERSATU']}
 
@@ -93,9 +113,9 @@ for state,lok in list_LOKALITI:
  
  #Get expected number of votes by each party
 
- TOTAL = df_pred_v2['BILANGAN UNDI_x'].sum()
+ TOTAL_NORM = df_pred_v2['BILANGAN UNDI_x'].sum()
     
- BERSATU = (df_pred_v2[df_pred_v2.PARTI == 'BN']['BILANGAN UNDI_x'][0] - df_pred_v2[df_pred_v2.PARTI == 'BN']['BILANGAN UNDI_y_x'][0])*S
+ BERSATU = (df_pred_v2[df_pred_v2.PARTI == 'BN']['BILANGAN UNDI_x'][0] - df_pred_v2[df_pred_v2.PARTI == 'BN']['BILANGAN UNDI_y_x'][0]) * S
  
  if BERSATU > 0:
     PN_PRU15 = df_pred_v2[df_pred_v2.PARTI == 'PN']['BILANGAN UNDI_y_x'][1] + BERSATU
@@ -111,35 +131,38 @@ for state,lok in list_LOKALITI:
 
  BN_PRU15 = df_pred_v2[df_pred_v2.PARTI == 'BN']['BILANGAN UNDI_y_x'][0] 
  
- #Get % of voter by party
- PN_PRU15_percent = round(PN_PRU15/TOTAL,2)
- BN_PRU15_percent = round(BN_PRU15/TOTAL,2)
- PH_PRU15_percent = round(PH_PRU15/TOTAL,2)
+ #Get % of undi biasa voters
+ PN_undi_biasa_PRU15_percent = round((PN_PRU15/TOTAL_NORM),2)
+ BN_undi_biasa_PRU15_percent = round((BN_PRU15/TOTAL_NORM),2)
+ PH_undi_biasa_PRU15_percent = round((PH_PRU15/TOTAL_NORM),2)
+    
+ #Get % of Undi18 voters
+ PN_Undi18_PRU15_percent = B
+ BN_Undi18_PRU15_percent = A
+ PH_Undi18_PRU15_percent = C
+    
+ #Get % total voters
+ PN_PRU15_final_percent = round(((PN_Undi18_PRU15_percent*undi_18_attend) + (PN_undi_biasa_PRU15_percent*undi_biasa_attend))/total_attend,2)
+ BN_PRU15_final_percent = round(((BN_Undi18_PRU15_percent*undi_18_attend) + (BN_undi_biasa_PRU15_percent*undi_biasa_attend))/total_attend,2)
+ PH_PRU15_final_percent = round(((PH_Undi18_PRU15_percent*undi_18_attend) + (PH_undi_biasa_PRU15_percent*undi_biasa_attend))/total_attend,2)
  
- dict_results_percent = {'BN':BN_PRU15_percent,'PN':PN_PRU15_percent,'PH':PH_PRU15_percent}
+ dict_results_percent = {'BN':BN_PRU15_final_percent,'PN':PN_PRU15_final_percent,'PH':PH_PRU15_final_percent}
  
- #Create dataframe with % of votes by party
- df_pred_v2['PERCENT_VOTES'] = df_pred_v2['PARTI'].apply(lambda x: dict_results_percent[x] if x != 'BERSATU' else 0)
- df_pred_v2['LOKALITI'] = lok
- df_pred_v3 = df_pred_v2[['LOKALITI','PARTI','PERCENT_VOTES']]
+ #Identify winner and create dataframe 
+ max_precent = max(dict_results_percent.values())
+ max_keys = [k for k, v in dict_results_percent.items() if v == max_precent]
+ winner = max_keys[0]
 
- frame = [df_percent,df_pred_v3]
- df_percent = pd.concat(frame)
-
- #Identify winner and create dataframe   
- dict_results_inverse = {BN_PRU15: 'BN',PN_PRU15:'PN',PH_PRU15:'PH'}
- 
- winner = dict_results_inverse[max(dict_results_inverse)]
- 
- list_votes = [i for i in dict_results_inverse.keys()]
+ list_votes = list(dict_results_percent.values())
 
  list_votes.sort()
  
  #Calculate margin of victory   
- margin = round(((list_votes[2] - list_votes[1]) / TOTAL),2)
+ margin = list_votes[2] - list_votes[1]
 
- if margin > 100:
+ if margin > 1:
         print(lok)
+        
  list_winner += [[state,lok,winner,margin]]
 
 #Create dataframe of results
@@ -149,17 +172,16 @@ pru15_pm_pred_sum = pru15_pm_pred.groupby('WINNER').LOKALITI.count().reset_index
 
 max_value = pru15_pm_pred_sum.LOKALITI.max()
 df_winner = pru15_pm_pred_sum[pru15_pm_pred_sum.LOKALITI == max_value]['WINNER'].reset_index()
+final_results = list(df_winner['WINNER'])
 winner_name = df_winner['WINNER'][0]
 
 
-if winner_name == 'PH':
-    st.subheader("The winner is Pakatan Harapan!")
+if len(final_results) == 1:
+    winning_party = final_results[0]
+    st.subheader("The leader is " +  winning_party + "!. They can lead the negotiations to form government")
 
-elif winner_name == 'BN':
-    st.subheader("The winner is Barisan Nasional!")
-    
-elif winner_name == 'PN':
-    st.subheader("The winner is Perikatan Nasional!")
+elif len(final_results) > 1:
+    st.subheader("It's a tie 😱!")
 
 
 ####################
@@ -173,21 +195,37 @@ color_scale = alt.Scale(
 )
 
 #Chart of overall results
-chart_1 = alt.Chart(pru15_pm_pred_sum).mark_arc(innerRadius=50).encode(
-    theta=alt.Theta(field="LOKALITI", type="quantitative"),
-    color=alt.Color('WINNER:N', legend=None, scale=color_scale),
-    tooltip = [alt.Tooltip('WINNER:N'),
-               alt.Tooltip('LOKALITI:Q')]
-) 
+# chart_1 = alt.Chart(pru15_pm_pred_sum).mark_arc(innerRadius=50).encode(
+#     theta=alt.Theta(field="LOKALITI", type="quantitative"),
+#     color=alt.Color('WINNER:N', legend=None, scale=color_scale),
+#     tooltip = [alt.Tooltip('WINNER:N'),
+#                alt.Tooltip('LOKALITI:Q')]
+# ) 
+# text_1 = chart_1.mark_text(innerRadius=50, size=20).encode(text="WINNER:N")
 
-st.altair_chart(chart_1, use_container_width=True)
+# st.altair_chart(chart_1 + text_1, use_container_width=True)
 
+
+base = alt.Chart(pru15_pm_pred_sum).encode(
+    theta=alt.Theta("LOKALITI:Q", stack=True),
+     color=alt.Color("WINNER:N", legend=None, scale=color_scale),
+     tooltip = [alt.Tooltip('WINNER:N'),
+                alt.Tooltip('LOKALITI:Q')]
+)
+
+pie = base.mark_arc(outerRadius=120,innerRadius=50)
+text = base.mark_text(radius=140, size=20).encode(text="WINNER:N")
+
+st.altair_chart(pie + text, use_container_width=True)
 #Chart to filter by State
 
 st.subheader("State Level Results")
 st.markdown("Keep an eye for constituencies with small margin of victory, anything can happen 😰")
 
 source = pru15_pm_pred
+state_mapping = {'JH':'JOHOR','KD':'KEDAH','KE':'KELANTAN','MK':'MELAKA','NS':'NEGERI SEMBILAN','PH':'PAHANG','PR':'PERAK','PL':'PERLIS',
+'PN':'PULAU PINANG','SB':'SABAH','SW':'SARAWAK','SL':'SELANGOR','TR':'TERENGGANU','WP':'WP KUALA LUMPUR','WP':'WP PUTRAJAYA'}
+source['STATE'] = source['STATE'].apply(lambda x : state_mapping[x])
 all_symbols = pru15_pm_pred.STATE.unique()
 symbols = st.multiselect("Choose a State(Hover on points for details)", all_symbols, all_symbols[:3])
 source = source[source.STATE.isin(symbols)]
