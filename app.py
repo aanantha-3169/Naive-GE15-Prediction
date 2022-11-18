@@ -13,19 +13,23 @@ from PIL import Image
 title = "Naive GE15 Prediction 🇲🇾"
 st.title(title)
 
-st.write("by (https://github.com/aanantha-3169)")
+st.write("source code: (https://github.com/aanantha-3169)")
 
 #Content
 
 st.header("*What can history tell us?*")
-st.markdown("![Alt Text](https://giphy.com/gifs/cat-reading-NCepaG8qx9skM")
-            #width="480" height="270"https://giphy.com/gifs/cat-reading-NCepaG8qx9skM">via GIPHY</a></p>")
+st.markdown("![Alt Text](https://media.giphy.com/media/ue5ZwFCaxy64M/giphy.gif)")
+st.markdown('##')
 
-st.markdown("Let's use results from PRU 13 & 14 to calculate the contribution of each party and make a prediction for PRU15 🤩"
-"For all the youths out there wondering if you should vote, play around with the turnout of youngest to see how you can determine the future of this country")
-#image = Image.open('Timeline.jpeg')
-#st.image(image,caption='Evolution of Coalitions')
-st.markdown("Note: This analysis is simply using past results to predict the future and only looks at the 3 big coalition; BN 🔵,PN ⚫ and PH 🔴"
+st.markdown("Let's use results from PRU 13 & 14 to calculate the contribution of each party and make a prediction for PRU15 🤩")
+st.markdown('##')
+st.header("*What about the young voters?*")
+st.markdown("![Alt Text](https://media.giphy.com/media/JTzPN5kkobFv7X0zPJ/giphy.gif)")
+st.markdown('##')
+st.markdown(" For all the youths out there wondering if you should vote, play around with the turnout of youngest to see how you can determine the future of this country!!!")
+st.markdown('##')
+
+st.markdown("Note: This analysis is simply using past results to predict the future and only looks at the 3 big coalition; BN 🔵,PN ⚫ and PH 🔴."
            )
 
 #Sidebar
@@ -34,35 +38,37 @@ st.write("See how the results change by changing the following:")
 
 # user inputs on sidebar
 S = st.slider("How much do you think the BN defactors(Bersatu) contributed to PH's victory in PRU14?(%)", value=100,min_value=0, max_value=100)
-
+S = S/100
 X = st.slider('What do you think will be the turnout of 18 - 21 year olds(%)?', value=80,min_value=0, max_value=100)
+X = X/100
+A = st.slider('How many 18 - 21 year olds do you think support BN (%) 🔵', value=38,min_value=0, max_value=100)
 
-A = st.slider('How many 18 - 21 year olds do you think support BN(%) 🔵', value=38,min_value=0, max_value=100)
-
-B = st.slider('How many 18 - 21 year olds do you think support PN(%) ⚫', value=21,min_value=0, max_value=100)
+B = st.slider('How many 18 - 21 year olds do you think support PN (%) ⚫', value=21,min_value=0, max_value=100)
 
 if A > 0 and B > 0:
- C = st.slider('How many 18 - 21 year olds do you think support PH(%) 🔴', value=100 - A - B,min_value=0, max_value=100)
+ C = st.slider('How many 18 - 21 year olds do you think support PH (%) 🔴', value=100 - A - B,min_value=0, max_value=100)
 
 else:
- C = st.slider('How many 18 - 21 year olds do you think support PH(%) 🔴', value=41,min_value=0, max_value=100)
+ C = st.slider('How many 18 - 21 year olds do you think support PH (%) 🔴', value=41,min_value=0, max_value=100)
 
-if A+B+C == 1:
+if A+B+C == 100:
    pass
 
 else:
  st.warning('Total Undi 18 votes must add up to 100% 🥴. Change values and try again', icon="⚠️")
 
-
+A = A/100
+B = B/100
+C = C/100
 
 ####################
 ### ANALYSIS ###
 ####################
 
 #Reading Relevant Files
-""" Sources: 1)https://github.com/TindakMalaysia/General-Election-Data & https://undi.info/ --> Election results
-             2)https://www.data.gov.my/data/en_US/organization/election-commission-of-malaysia-spr?res_format=CSV --> Voter turnout
-             3)https://github.com/Thevesh/analysis-election-msia --> % Voters 18 - 21 years old """ 
+#    Sources: 1)https://github.com/TindakMalaysia/General-Election-Data & https://undi.info/ --> Election results
+#             2)https://www.data.gov.my/data/en_US/organization/election-commission-of-malaysia-spr?res_format=CSV --> Voter turnout
+#             3)https://github.com/Thevesh/analysis-election-msia --> % Voters 18 - 21 years old """ 
 
 pru14_pm = pd.read_csv('keputusan-pru-14-parlimen_v2.csv')
 pru13_pm = pd.read_csv('keputusan-pru-13-parlimen.csv')
@@ -179,11 +185,12 @@ for state,lok in list_LOKALITI:
 
 #Create dataframe of results
 pru15_pm_pred = pd.DataFrame(list_winner,columns = ['STATE','CONSTITUENCY','WINNER','MARGIN'])
-pru15_pm_pred_sum = pru15_pm_pred.groupby('WINNER').LOKALITI.count().reset_index()
-pru15_pm_pred_sum['PRECENT TOTAL'] = pru15_pm_pred_sum.LOKALITI.apply(lambda x: str((x/165) * 100) + '%')
+pru15_pm_pred_sum = pru15_pm_pred.groupby('WINNER').agg(TOTAL =('CONSTITUENCY', 'count')).reset_index()
+pru15_pm_pred_sum['PRECENT_TOTAL'] = pru15_pm_pred_sum.TOTAL.apply(lambda x: str(round((x/165) * 100)) + '%')
+pru15_pm_pred_sum['FINAL_RESULT'] = pru15_pm_pred_sum.apply(lambda x: str(x.WINNER) + ' ' + str(x.PRECENT_TOTAL),axis = 1)
 
-max_value = pru15_pm_pred_sum.LOKALITI.max()
-df_winner = pru15_pm_pred_sum[pru15_pm_pred_sum.LOKALITI == max_value]['WINNER'].reset_index()
+max_value = pru15_pm_pred_sum.TOTAL.max()
+df_winner = pru15_pm_pred_sum[pru15_pm_pred_sum.TOTAL == max_value]['WINNER'].reset_index()
 final_results = list(df_winner['WINNER'])
 winner_name = df_winner['WINNER'][0]
 
@@ -219,28 +226,28 @@ color_scale = alt.Scale(
 
 
 base = alt.Chart(pru15_pm_pred_sum).encode(
-    theta=alt.Theta("LOKALITI:Q", stack=True),
+    theta=alt.Theta("TOTAL:Q", stack=True),
      color=alt.Color("WINNER:N", legend=None, scale=color_scale),
-     tooltip = [alt.Tooltip('WINNER:N'),
-                alt.Tooltip('LOKALITI:Q')]
+     tooltip = [alt.Tooltip('TOTAL:Q')]
 )
 
-pie = base.mark_arc(outerRadius=120,innerRadius=50)
-text = base.mark_text(radius=140, size=20).encode(text="WINNER:N,PRECENT TOTAL:Q")
+pie = base.mark_arc(outerRadius=110,innerRadius=50)
+text = base.mark_text(radius=150, size=20).encode(text="FINAL_RESULT:N")
 
 st.altair_chart(pie + text, use_container_width=True)
 #Chart to filter by State
 
 st.subheader("State Level Results")
-st.markdown("Keep an eye for constituencies with small margin of victory, anything can happen 😰")
-
+st.markdown("Keep an eye for constituencies with a small margin of victory, anything can happen 😰")
+st.markdown("![Alt Text](https://media.giphy.com/media/xT1XGvP9PArEBYcFcQ/giphy.gif)")
 source = pru15_pm_pred
 state_mapping = {'JH':'JOHOR','KD':'KEDAH','KE':'KELANTAN','MK':'MELAKA','NS':'NEGERI SEMBILAN','PH':'PAHANG','PR':'PERAK','PL':'PERLIS',
 'PN':'PULAU PINANG','SB':'SABAH','SW':'SARAWAK','SL':'SELANGOR','TR':'TERENGGANU','WP':'WP KUALA LUMPUR','WP':'WP PUTRAJAYA'}
 source['STATE'] = source['STATE'].apply(lambda x : state_mapping[x])
-all_symbols = pru15_pm_pred.STATE.unique()
-symbols = st.multiselect("Choose a State(Hover on points for details)", all_symbols, all_symbols[:3])
-source = source[source.STATE.isin(symbols)]
+all_state = pru15_pm_pred.STATE.unique()
+
+states = st.multiselect("Choose a State(Hover on points for details)", all_state, all_state[:3])
+source = source[source.STATE.isin(states)]
 
 chart_2 = alt.Chart(source).mark_point(filled=True, opacity=1, size=100).encode(
     alt.X('x:O', axis=None),
@@ -248,7 +255,7 @@ chart_2 = alt.Chart(source).mark_point(filled=True, opacity=1, size=100).encode(
     alt.Row('STATE:N', header=alt.Header(title='')),
     #alt.Shape('animal:N', legend=None, scale=shape_scale),
     alt.Color('WINNER:N', legend=None, scale=color_scale),
-    tooltip = [alt.Tooltip('LOKALITI:N'),
+    tooltip = [alt.Tooltip('CONSTITUENCY:N'),
                alt.Tooltip('WINNER:N'),
                alt.Tooltip('MARGIN:Q')
               ]
@@ -258,3 +265,4 @@ chart_2 = alt.Chart(source).mark_point(filled=True, opacity=1, size=100).encode(
 ).properties(width=550, height=140)
 
 st.altair_chart(chart_2, use_container_width=True)
+
