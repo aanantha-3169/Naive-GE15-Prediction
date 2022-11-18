@@ -8,18 +8,23 @@ import numpy as np
 import pandas as pd
 import altair as alt
 from PIL import Image
+
+# headings
+title = "Naive GE15 Prediction 🇲🇾"
+st.title(title)
+
+st.write("source code: (https://github.com/aanantha-3169)")
 @st.cache(allow_output_mutation=True)
 def Pageviews():
     return []
 
 pageviews=Pageviews()
 pageviews.append('dummy')
-# headings
-title = "Naive GE15 Prediction 🇲🇾"
-st.title(title)
 
-st.write("source code: (https://github.com/aanantha-3169)")
-
+try:
+    st.markdown('Page viewed = {} times.'.format(len(pageviews)))
+except ValueError:
+    st.markdown('Page viewed = {} times.'.format(1))
 #Content
 
 st.header("*What can history tell us?*")
