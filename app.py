@@ -18,6 +18,8 @@ st.write("by (https://github.com/aanantha-3169)")
 #Content
 
 st.header("*What can history tell us?*")
+st.markdown("![Alt Text](<div style="width:100%;height:0;padding-bottom:56%;position:relative;"><iframe src="https://giphy.com/embed/NCepaG8qx9skM" width="100%" height="100%" style="position:absolute" frameBorder="0" class="giphy-embed" allowFullScreen></iframe></div><p><a href="https://giphy.com/gifs/cat-reading-NCepaG8qx9skM">via GIPHY</a></p>)")
+
 st.markdown("Let's use results from PRU 13 & 14 to calculate the contribution of each party and make a prediction for PRU15 🤩"
 "For all the youths out there wondering if you should vote, play around with the turnout of youngest to see how you can determine the future of this country")
 #image = Image.open('Timeline.jpeg')
