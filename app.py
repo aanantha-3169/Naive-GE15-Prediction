@@ -8,7 +8,12 @@ import numpy as np
 import pandas as pd
 import altair as alt
 from PIL import Image
+@st.cache(allow_output_mutation=True)
+def Pageviews():
+    return []
 
+pageviews=Pageviews()
+pageviews.append('dummy')
 # headings
 title = "Naive GE15 Prediction 🇲🇾"
 st.title(title)
