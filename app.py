@@ -177,7 +177,7 @@ for state,lok in list_LOKALITI:
 #Create dataframe of results
 pru15_pm_pred = pd.DataFrame(list_winner,columns = ['STATE','CONSTITUENCY','WINNER','MARGIN'])
 pru15_pm_pred_sum = pru15_pm_pred.groupby('WINNER').LOKALITI.count().reset_index()
-pru15_pm_pred_sum['PRECENT TOTAL'] = pru15_pm_pred_sum.LOKALITI.apply(lambad x: str((x/165) * 100) + '%')
+pru15_pm_pred_sum['PRECENT TOTAL'] = pru15_pm_pred_sum.LOKALITI.apply(lambda x: str((x/165) * 100) + '%')
 
 max_value = pru15_pm_pred_sum.LOKALITI.max()
 df_winner = pru15_pm_pred_sum[pru15_pm_pred_sum.LOKALITI == max_value]['WINNER'].reset_index()
