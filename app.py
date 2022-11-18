@@ -18,7 +18,7 @@ st.write("by (https://github.com/aanantha-3169)")
 #Content
 
 st.header("*What can history tell us?*")
-st.markdown("![Alt Text](https://giphy.com/embed/NCepaG8qx9skM")
+st.markdown("![Alt Text](https://giphy.com/gifs/cat-reading-NCepaG8qx9skM")
             #width="480" height="270"https://giphy.com/gifs/cat-reading-NCepaG8qx9skM">via GIPHY</a></p>")
 
 st.markdown("Let's use results from PRU 13 & 14 to calculate the contribution of each party and make a prediction for PRU15 🤩"
