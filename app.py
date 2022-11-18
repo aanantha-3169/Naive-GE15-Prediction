@@ -17,33 +17,38 @@ st.write("by (https://github.com/aanantha-3169)")
 
 #Content
 
-st.header("*Why Undi 18 Matters!*")
-st.markdown("This simple simulation aim to demonstrate how young voters can change the elections 😱"
-" We use results from PRU 13 & 14 to calculate the contribution of ea ch party to a coalition.")
+st.header("*What can history tell us?*")
+st.markdown("Let's use results from PRU 13 & 14 to calculate the contribution of each party and make a prediction for PRU15 🤩"
+"For all the youths out there wondering if you should vote, play around with the turnout of youngest to see how you can determine the future of this country")
 #image = Image.open('Timeline.jpeg')
 #st.image(image,caption='Evolution of Coalitions')
-st.markdown("Note: For simplicity we are ignoring GTA 👴🏼 and Independents 🤠 for this analysis")
+st.markdown("Note: This analysis is simply using past results to predict the future and only looks at the 3 big coalition; BN 🔵,PN ⚫ and PH 🔴"
+           )
 
 #Sidebar
-st.title("Scenarios")
+st.title("Scenarios ")
 st.write("See how the results change by changing the following:")
 
 # user inputs on sidebar
-S = st.slider('% of PH votes in PRU14 contributed by Bersatu', value=1.0,min_value=0.0, max_value=1.0)
+S = st.slider("How much do you think the BN defactors(Bersatu) contributed to PH's victory in PRU14?(%)", value=100,min_value=0, max_value=100)
 
-X = st.slider('% of Undi 18 turnout', value=0.8,min_value=0.0, max_value=1.0)
+X = st.slider('What do you think will be the turnout of 18 - 21 year olds(%)?', value=80,min_value=0, max_value=100)
 
-A = st.slider('% of Undi 18 to BN', value=0.38,min_value=0.0, max_value=1.0)
+A = st.slider('How many 18 - 21 year olds do you think support BN(%) 🔵', value=38,min_value=0, max_value=100)
 
-B = st.slider('% of Undi 18 to PN', value=0.21,min_value=0.0, max_value=1.0)
+B = st.slider('How many 18 - 21 year olds do you think support PN(%) ⚫', value=21,min_value=0, max_value=100)
 
-C = st.slider('% of Undi 18 to PH', value=0.41,min_value=0.0, max_value=1.0)
+if A > 0 and B > 0:
+ C = st.slider('How many 18 - 21 year olds do you think support PH(%) 🔴', value=100 - A - B,min_value=0, max_value=100)
+
+else:
+ C = st.slider('How many 18 - 21 year olds do you think support PH(%) 🔴', value=41,min_value=0, max_value=100)
 
 if A+B+C == 1:
    pass
 
 else:
- st.warning('Total Undi 18 votes must add up to 1 🥴. Change values and try again', icon="⚠️")
+ st.warning('Total Undi 18 votes must add up to 100% 🥴. Change values and try again', icon="⚠️")
 
 
 
@@ -52,6 +57,10 @@ else:
 ####################
 
 #Reading Relevant Files
+""" Sources: 1)https://github.com/TindakMalaysia/General-Election-Data & https://undi.info/ --> Election results
+             2)https://www.data.gov.my/data/en_US/organization/election-commission-of-malaysia-spr?res_format=CSV --> Voter turnout
+             3)https://github.com/Thevesh/analysis-election-msia --> % Voters 18 - 21 years old """ 
+
 pru14_pm = pd.read_csv('keputusan-pru-14-parlimen_v2.csv')
 pru13_pm = pd.read_csv('keputusan-pru-13-parlimen.csv')
 undi18_inputs = pd.read_csv('undi_18_inputs.csv')
@@ -166,9 +175,9 @@ for state,lok in list_LOKALITI:
  list_winner += [[state,lok,winner,margin]]
 
 #Create dataframe of results
-pru15_pm_pred = pd.DataFrame(list_winner,columns = ['STATE','LOKALITI','WINNER','MARGIN'])
+pru15_pm_pred = pd.DataFrame(list_winner,columns = ['STATE','CONSTITUENCY','WINNER','MARGIN'])
 pru15_pm_pred_sum = pru15_pm_pred.groupby('WINNER').LOKALITI.count().reset_index()
-
+pru15_pm_pred_sum['PRECENT TOTAL'] = pru15_pm_pred_sum.LOKALITI.apply(lambad x: str((x/165) * 100) + '%')
 
 max_value = pru15_pm_pred_sum.LOKALITI.max()
 df_winner = pru15_pm_pred_sum[pru15_pm_pred_sum.LOKALITI == max_value]['WINNER'].reset_index()
@@ -178,10 +187,10 @@ winner_name = df_winner['WINNER'][0]
 
 if len(final_results) == 1:
     winning_party = final_results[0]
-    st.subheader("The leader is " +  winning_party + "!. They can lead the negotiations to form government")
+    st.subheader("The leader in Peninsular Malaysia is " +  winning_party + " 🥳!. They can lead the negotiations to form government")
 
 elif len(final_results) > 1:
-    st.subheader("It's a tie 😱!")
+    st.subheader("It's a tie in Peninsular Malaysia 😱!")
 
 
 ####################
@@ -191,7 +200,7 @@ domains = ['PH', 'BN', 'PN']
 
 color_scale = alt.Scale(
     domain=domains,
-    range=['rgb(255,0,0)', 'rgb(0,128,255)', 'rgb(0,255,0)']
+    range=['rgb(255,0,0)', 'rgb(0,128,255)', 'rgb(128,128,128)']
 )
 
 #Chart of overall results
@@ -214,7 +223,7 @@ base = alt.Chart(pru15_pm_pred_sum).encode(
 )
 
 pie = base.mark_arc(outerRadius=120,innerRadius=50)
-text = base.mark_text(radius=140, size=20).encode(text="WINNER:N")
+text = base.mark_text(radius=140, size=20).encode(text="WINNER:N,PRECENT TOTAL:Q")
 
 st.altair_chart(pie + text, use_container_width=True)
 #Chart to filter by State
