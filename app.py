@@ -37,7 +37,7 @@ st.title("Scenarios ")
 st.write("See how the results change by changing the following:")
 
 # user inputs on sidebar
-S = st.slider("How much do you think the BN defactors(Bersatu) contributed to PH's victory in PRU14?(%)", value=100,min_value=0, max_value=100)
+S = st.slider("How much do you think the ex BN folks(Bersatu) contributed to PH's victory in PRU14?(%)", value=100,min_value=0, max_value=100)
 S = S/100
 X = st.slider('What do you think will be the turnout of 18 - 21 year olds(%)?', value=80,min_value=0, max_value=100)
 X = X/100
